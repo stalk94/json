@@ -8,13 +8,13 @@ Supports editing, adding/removing fields, changing types (`string`, `number`, `b
 ## 🚀 Installation
 
 ```bash
-npm install react-json-editor
+npm install react-json-editor-tw
 ```
 
 or
 
 ```bash
-yarn add react-json-editor
+yarn add react-json-editor-tw
 ```
 
 ---
@@ -23,7 +23,7 @@ yarn add react-json-editor
 
 ```tsx
 import React, { useState } from "react";
-import JsonEditor from "react-json-editor";
+import JsonEditor from "react-json-editor-tw";
 
 export default function App() {
   const [data, setData] = useState({
