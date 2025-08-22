@@ -2,11 +2,13 @@ import React, { useState, useMemo } from "react";
 import { MdKeyboardArrowRight, MdKeyboardArrowDown, MdCheckCircle } from "react-icons/md";
 import { MdDeleteForever, MdAddCircleOutline } from "react-icons/md";
 import { useJsonEditorContext } from "./provider";
-import { AddField } from './helpers';
+import AddField from './helpers/AddField';
 import type { EditorProps } from './types';
 import defaultTheme from './theme';
-
-
+import KeyEditable from './helpers/Key';
+import ToogleBoolean from './helpers/Boolean';
+import TypeSwitcher from './helpers/TypeSwitcher';
+import { useHover } from './helpers/hooks';
 
 
 export default function JsonEditor({
@@ -62,7 +64,8 @@ export default function JsonEditor({
     const renderControls = (onDelete?: () => void, onAdd?: () => void) => (
         <span style={{ display: "inline-flex", gap: 4, marginLeft: 8 }}>
             {(editable && onAdd) && (
-                <button
+                <button 
+                    className="mr-1"
                     onClick={(e) => {
                         e.stopPropagation();
                         onAdd();
@@ -74,7 +77,7 @@ export default function JsonEditor({
                         color: "#6c6c6c",
                     }}
                 >
-                    <MdAddCircleOutline />
+                    <MdAddCircleOutline size={16} />
                 </button>
             )}
             {(editable && onDelete) && (
@@ -90,7 +93,7 @@ export default function JsonEditor({
                         color: "tomato",
                     }}
                 >
-                    <MdDeleteForever />
+                    <MdDeleteForever size={16} />
                 </button>
             )}
         </span>
@@ -99,6 +102,7 @@ export default function JsonEditor({
         <span style={{ display: "inline-flex", gap: 4, marginLeft: 8 }}>
             {(editable) && (
                 <button
+                    className="mr-1"
                     onClick={(e) => {
                         setAdding(true);
                     }}
@@ -109,7 +113,7 @@ export default function JsonEditor({
                         color: "#6c6c6c",
                     }}
                 >
-                    <MdAddCircleOutline />
+                    <MdAddCircleOutline size={16} />
                 </button>
             )}
             {(editable && onDelete) && (
@@ -125,7 +129,7 @@ export default function JsonEditor({
                         color: "tomato",
                     }}
                 >
-                    <MdDeleteForever />
+                    <MdDeleteForever size={16} />
                 </button>
             )}
         </span>
@@ -135,35 +139,23 @@ export default function JsonEditor({
     // === Boolean ===
     if (typeof value === "boolean") {
         const isEditing = editingId === nodeId;
+        const { hover, bind } = useHover();
 
         return (
             <div
                 className="flex"
                 style={{ ...commonText, paddingLeft: depth * step }}
+                {...bind}
             >
-                {label && (
-                    <span className="flex" style={label.startsWith("[") ? indexStyle : keyStyle}>
-                        <span
-                            contentEditable={editable && !label.startsWith("[")}
-                            suppressContentEditableWarning
-                            onBlur={(e) => {
-                                const newKey = e.currentTarget.textContent?.trim();
-                                if (editable && onRename && newKey && newKey !== label) {
-                                    onRename(label, newKey);
-                                } 
-                                else e.currentTarget.textContent = label;
-                            }}
-                            style={{
-                                display: "inline-block",
-                                outline: "none",
-                                minWidth: "1ch" // чтобы не схлопывался
-                            }}
-                        >
-                            {label}
-                        </span>
-                        <span style={{ color: c.colon }}>:</span>
-                    </span>
-                )}
+                {label && 
+                    <KeyEditable
+                        style={label.startsWith("[") ? indexStyle : keyStyle}
+                        label={label}
+                        color={c.colon}
+                        onRename={onRename}
+                        editable={editable}
+                    />
+                }
                 <span
                     style={{
                         color: c.boolean,
@@ -177,51 +169,35 @@ export default function JsonEditor({
                     {String(value)}
                 </span>
 
-                {editable && isEditing && onChange && (
-                    <span className="mx-6" style={{ display: "inline-flex", gap: 4 }}>
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onChange(true);
-                                setEditingId(null);
-                            }}
-                            style={{
-                                cursor: "pointer",
-                                border: `1px solid ${c.border}`,
-                                borderRadius: 4,
-                                padding: "0 4px",
-                                fontSize: s.fontSize,
-                                background: value === true ? "#ffffff96" : "transparent",
-                                color: "white",
-                                opacity: value === false ? 0.6 : 1,
-                            }}
-                        >
-                            ✔
-                        </button>
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onChange(false);
-                                setEditingId(null);
-                            }}
-                            style={{
-                                cursor: "pointer",
-                                border: `1px solid ${c.border}`,
-                                borderRadius: 4,
-                                padding: "0 4px",
-                                fontSize: s.fontSize,
-                                background: value === false ? "#ffffff96" : "transparent",
-                                color: "white",
-                                opacity: value === true ? 0.6 : 1,
-                            }}
-                        >
-                            ✖
-                        </button>
-                    </span>
+                {editable && isEditing && hover && onChange && (
+                    <ToogleBoolean
+                        onChange={onChange}
+                        setEditingId={setEditingId}
+                        value={value}
+                        fontSize={s.fontSize}
+                        border={c.border}
+                    />
                 )}
-                {editable && onDelete && (
-                    <button 
+                {editable && hover &&
+                    <TypeSwitcher
+                        current="boolean"
                         className="ml-auto"
+                        onChangeType={(type) => {
+                            let newVal: any = null;
+                            switch (type) {
+                                case "string": newVal = ""; break;
+                                case "number": newVal = 0; break;
+                                case "boolean": newVal = false; break;
+                                case "null": newVal = null; break;
+                                case "object": newVal = {}; break;
+                                case "array": newVal = []; break;
+                            }
+                            onChange(newVal);
+                        }}
+                    />
+                }
+                {editable && hover && onDelete && (
+                    <button 
                         onClick={(e) => {
                             e.stopPropagation();
                             onDelete();
@@ -233,7 +209,7 @@ export default function JsonEditor({
                             color: "#f1aa9d9d",
                         }}
                     >
-                        <MdDeleteForever />
+                        <MdDeleteForever size={16}  />
                     </button>
                 )}
             </div>
@@ -241,31 +217,23 @@ export default function JsonEditor({
     }
     // === String ===
     if (typeof value === "string") {
+        const { hover, bind } = useHover();
+
         return (
-            <div className="flex" style={{ ...commonText, paddingLeft: depth * step }}>
-                {label && (
-                    <span className="flex" style={label.startsWith("[") ? indexStyle : keyStyle}>
-                        <span
-                            contentEditable={editable && !label.startsWith("[")}
-                            suppressContentEditableWarning
-                            onBlur={(e) => {
-                                const newKey = e.currentTarget.textContent?.trim();
-                                if (editable && onRename && newKey && newKey !== label) {
-                                    onRename(label, newKey);
-                                } 
-                                else e.currentTarget.textContent = label;
-                            }}
-                            style={{
-                                display: "inline-block",
-                                outline: "none",
-                                minWidth: "1ch" // чтобы не схлопывался
-                            }}
-                        >
-                            {label}
-                        </span>
-                        <span style={{ color: c.colon }}>:</span>
-                    </span>
-                )}
+            <div 
+                className="flex" 
+                style={{ ...commonText, paddingLeft: depth * step }}
+                {...bind}
+            >
+                {label && 
+                    <KeyEditable
+                        style={label.startsWith("[") ? indexStyle : keyStyle}
+                        label={label}
+                        color={c.colon}
+                        onRename={onRename}
+                        editable={editable}
+                    />
+                }
                 <input
                     value={value}
                     disabled={!editable}
@@ -280,7 +248,24 @@ export default function JsonEditor({
                     }}
                     onChange={(e) => editable && onChange(e.target.value)}
                 />
-                {editable && onDelete && (
+                {editable && hover &&
+                    <TypeSwitcher
+                        current="string"
+                        onChangeType={(type) => {
+                            let newVal: any = null;
+                            switch (type) {
+                                case "string": newVal = ""; break;
+                                case "number": newVal = 0; break;
+                                case "boolean": newVal = false; break;
+                                case "null": newVal = null; break;
+                                case "object": newVal = {}; break;
+                                case "array": newVal = []; break;
+                            }
+                            onChange(newVal);
+                        }}
+                    />
+                }
+                {editable && hover && onDelete && (
                     <button className="ml-auto"
                         onClick={(e) => {
                             e.stopPropagation();
@@ -293,7 +278,7 @@ export default function JsonEditor({
                             color: "#f1aa9d9d",
                         }}
                     >
-                        <MdDeleteForever />
+                        <MdDeleteForever size={16} />
                     </button>
                 )}
             </div>
@@ -301,31 +286,23 @@ export default function JsonEditor({
     }
     // === Number ===
     if (typeof value === "number") {
+        const { hover, bind } = useHover();
+
         return (
-            <div className="flex" style={{ ...commonText, paddingLeft: depth * step }}>
-                {label && (
-                    <span className="flex" style={label.startsWith("[") ? indexStyle : keyStyle}>
-                        <span
-                            contentEditable={editable && !label.startsWith("[")}
-                            suppressContentEditableWarning
-                            onBlur={(e) => {
-                                const newKey = e.currentTarget.textContent?.trim();
-                                if (editable && onRename && newKey && newKey !== label) {
-                                    onRename(label, newKey);
-                                } 
-                                else e.currentTarget.textContent = label;
-                            }}
-                            style={{
-                                display: "inline-block",
-                                outline: "none",
-                                minWidth: "1ch" // чтобы не схлопывался
-                            }}
-                        >
-                            {label}
-                        </span>
-                        <span style={{ color: c.colon }}>:</span>
-                    </span>
-                )}
+            <div 
+                className="flex" 
+                style={{ ...commonText, paddingLeft: depth * step }}
+                {...bind}
+            >
+                {label && 
+                    <KeyEditable
+                        style={label.startsWith("[") ? indexStyle : keyStyle}
+                        label={label}
+                        color={c.colon}
+                        onRename={onRename}
+                        editable={editable}
+                    />
+                }
                 <input
                     type="number"
                     value={String(value)}
@@ -345,9 +322,26 @@ export default function JsonEditor({
                         if (!isNaN(parsed)) onChange(parsed);
                     }}
                 />
-                {editable && onDelete && (
-                    <button 
+                {editable && hover &&
+                    <TypeSwitcher
                         className="ml-auto"
+                        current="number"
+                        onChangeType={(type) => {
+                            let newVal: any = null;
+                            switch (type) {
+                                case "string": newVal = ""; break;
+                                case "number": newVal = 0; break;
+                                case "boolean": newVal = false; break;
+                                case "null": newVal = null; break;
+                                case "object": newVal = {}; break;
+                                case "array": newVal = []; break;
+                            }
+                            onChange(newVal);
+                        }}
+                    />
+                }
+                {editable && hover && onDelete && (
+                    <button 
                         onClick={(e) => {
                             e.stopPropagation();
                             onDelete();
@@ -359,7 +353,7 @@ export default function JsonEditor({
                             color: "#f1aa9d9d",
                         }}
                     >
-                        <MdDeleteForever />
+                        <MdDeleteForever size={16} />
                     </button>
                 )}
             </div>
@@ -369,42 +363,28 @@ export default function JsonEditor({
     if (value === null) {
         return (
             <div style={{ ...commonText, paddingLeft: depth * step }}>
-                {label && (
-                    <span className="flex" style={label.startsWith("[") ? indexStyle : keyStyle}>
-                        <span
-                            contentEditable={editable && !label.startsWith("[")}
-                            suppressContentEditableWarning
-                            onBlur={(e) => {
-                                const newKey = e.currentTarget.textContent?.trim();
-                                if (editable && onRename && newKey && newKey !== label) {
-                                    onRename(label, newKey);
-                                } 
-                                else e.currentTarget.textContent = label;
-                            }}
-                            style={{
-                                display: "inline-block",
-                                outline: "none",
-                                minWidth: "1ch" // чтобы не схлопывался
-                            }}
-                        >
-                            {label}
-                        </span>
-                        <span style={{ color: c.colon }}>:</span>
-                    </span>
-                )}
+                {label && 
+                    <KeyEditable
+                        style={label.startsWith("[") ? indexStyle : keyStyle}
+                        label={label}
+                        color={c.colon}
+                        onRename={onRename}
+                        editable={editable}
+                    />
+                }
                 <span style={{ color: c.null, marginLeft: label ? 4 : 0 }}>
                     null
                 </span>
-                
             </div>
         );
     }
 
     // === Array ===
     if (Array.isArray(value)) {
+        const { hover, bind } = useHover();
+
         return (
-            <div style={{ ...commonText }}>
-                {/* Заголовок массива */}
+            <div style={{ ...commonText }} {...bind}>
                 <div
                     style={{
                         display: "flex",
@@ -418,13 +398,16 @@ export default function JsonEditor({
                         {collapsed ? <MdKeyboardArrowRight /> : <MdKeyboardArrowDown />}
                     </div>
                     {label && (
-                        <span className="opacity-50" style={label.startsWith("[") ? indexStyle : keyStyle}>
-                            {label}:
+                        <span 
+                            className="opacity-50" 
+                            style={label.startsWith("[") ? indexStyle : keyStyle}
+                        >
+                            { label }:
                         </span>
                     )}
                     <span className="opacity-50" style={{ color: c.type, marginLeft: 4 }}>Array</span>
                     <span className="opacity-50" style={{ color: c.brackets }}>[{value.length}]</span>
-                    {renderControls(
+                    {hover && renderControls(
                         path ? () => {
                             if (onDelete) onDelete();
                         }: undefined,
@@ -481,49 +464,36 @@ export default function JsonEditor({
     // === Object ===
     if (typeof value === "object" && !Array.isArray(value)) {
         const entries = Object.entries(value);
+        const { hover, bind } = useHover();
 
         return (
-            <div style={{ ...commonText }}>
-                {/* Заголовок объекта */}
+            <div style={{ ...commonText }} {...bind}>
                 <div
                     style={{
                         display: "flex",
                         alignItems: "center",
                         cursor: "pointer",
-                        paddingLeft: depth * step,   // <== только шапка с этим отступом
+                        paddingLeft: depth * step,
                     }}
                 >
                     <div className="opacity-50" onClick={toggleCollapse}>
                         {collapsed ? <MdKeyboardArrowRight /> : <MdKeyboardArrowDown />}
                     </div>
-                    {label && (
-                        <span className="opacity-50 flex" style={label.startsWith("[") ? indexStyle : keyStyle}>
-                            <span
-                                contentEditable={editable && !label.startsWith("[")}
-                                suppressContentEditableWarning
-                                onBlur={(e) => {
-                                    const newKey = e.currentTarget.textContent?.trim();
-                                    if (editable && onRename && newKey && newKey !== label) {
-                                        onRename(label, newKey);
-                                    } 
-                                    else e.currentTarget.textContent = label;
-                                }}
-                                style={{
-                                    display: "inline-block",
-                                    outline: "none",
-                                    minWidth: "1ch" // чтобы не схлопывался
-                                }}
-                            >
-                                { label }
-                            </span>
-                            <span style={{ color: c.colon }}>:</span>
-                        </span>
-                    )}
+                    {label &&
+                        <KeyEditable
+                            className="opacity-50"
+                            style={label.startsWith("[") ? indexStyle : keyStyle}
+                            label={label}
+                            color={c.colon}
+                            onRename={onRename}
+                            editable={editable}
+                        />
+                    }
                     <span className="opacity-50" style={{ color: c.type, marginLeft: 4 }}>Object</span>
                     <span className="opacity-50" style={{ color: c.brackets }}>{"{" + entries.length + "}"}</span>
-                    {renderControlsObject(
+                    {hover && renderControlsObject(
                         path ? () => {
-                             if (onDelete) onDelete();
+                            if (onDelete) onDelete();
                         } : undefined
                     )}
                 </div>
