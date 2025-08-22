@@ -1,5 +1,5 @@
 {
-    "name": "json-editor",
+    "name": "react-json-editor",
     "version": "0.4",
     "author": "stalk94",
     "homepage": "",
@@ -8,25 +8,23 @@
         "url": ""
     },
     "description": "Beautiful and customizable JSON editor for React with Tailwind CSS design. Supports editable fields, theme customization, and modern UI for working with JSON data.",
-    "module": "dist/index.js",
-    "types": "dist/index.d.ts",
+    "module": "./dist/json-editor.es.js",
+    "types": "./dist/index.d.ts",
     "type": "module",
     "exports": {
         ".": {
-            "import": "./dist/index.js",
+            "import": "./dist/json-editor.es.js",
             "types": "./dist/index.d.ts"
         }
     },
-    "sideEffects": false,
     "license": "MIT",
     "files": [
         "dist"
     ],
     "scripts": {
-        "build": "tsup src/index.ts --format esm --dts --no-sourcemap",
-        "start": "node index.js",
+        "build": "vite build",
         "dev": "vite",
-        "build:demo": "vite build"
+        "build:types": "tsc -p tsconfig.json"
     },
     "keywords": [
         "json",
@@ -54,7 +52,8 @@
     "devDependencies": {
         "@tailwindcss/postcss": "^4.1.12",
         "@tailwindcss/vite": "^4.1.12",
-        "@types/react": "^19.1.5",
+        "@types/react": "^19.1.11",
+        "@types/react-dom": "^19.1.7",
         "@vitejs/plugin-react": "^5.0.1",
         "autoprefixer": "^10.4.21",
         "cors": "^2.8.5",
