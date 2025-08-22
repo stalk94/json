@@ -3,6 +3,8 @@ import { MdKeyboardArrowRight, MdKeyboardArrowDown } from "react-icons/md";
 import { useJsonEditorContext } from "./provider";
 import defaultTheme from './theme';
 import type { PickerProps } from './types';
+import ToogleBoolean from './helpers/Boolean';
+
 
 
 export default function JsonEditor({
@@ -110,46 +112,17 @@ export default function JsonEditor({
                 >
                     {String(value)}
                 </span>
+
                 {renderPick()}
+
                 {editable && isEditing && onChange && (
-                    <span style={{ display: "inline-flex", gap: 4, marginLeft: 20 }}>
-                        <button
-                            onClick={() => {
-                                onChange(true);
-                                setEditingId(null);
-                            }}
-                            style={{
-                                cursor: "pointer",
-                                border: `1px solid ${c.border}`,
-                                borderRadius: 4,
-                                padding: "0 4px",
-                                fontSize: s.fontSize,
-                                background: value === true ? "#ffffff96" : "transparent",
-                                color: "white",
-                                opacity: value === false ? 0.6 : 1,
-                            }}
-                        >
-                            ✔
-                        </button>
-                        <button
-                            onClick={() => {
-                                onChange(false);
-                                setEditingId(null);
-                            }}
-                            style={{
-                                cursor: "pointer",
-                                border: `1px solid ${c.border}`,
-                                borderRadius: 4,
-                                padding: "0 4px",
-                                fontSize: s.fontSize,
-                                background: value === false ? "#ffffff96" : "transparent",
-                                color: "white",
-                                opacity: value === true ? 0.6 : 1,
-                            }}
-                        >
-                            ✖
-                        </button>
-                    </span>
+                    <ToogleBoolean
+                        onChange={onChange}
+                        setEditingId={setEditingId}
+                        value={value}
+                        fontSize={s.fontSize}
+                        border={c.border}
+                    />
                 )}
             </div>
         );
@@ -257,16 +230,16 @@ export default function JsonEditor({
                         paddingLeft: depth * step, // ✅ как в первом
                     }}
                 >
-                    <div style={{ opacity: 0.55 }}>
+                    <div className="opacity-50">
                         {collapsed ? <MdKeyboardArrowRight /> : <MdKeyboardArrowDown />}
                     </div>
                     {label && (
-                        <span style={label.startsWith("[") ? indexStyle : keyStyle}>
+                        <span className="opacity-50" style={label.startsWith("[") ? indexStyle : keyStyle}>
                             {label}:
                         </span>
                     )}
-                    <span style={{ color: c.type, marginLeft: label ? 4 : 0 }}>Array</span>
-                    <span style={{ color: c.brackets }}>[{value.length}]</span>
+                    <span className="opacity-50" style={{ color: c.type, marginLeft: label ? 4 : 0 }}>Array</span>
+                    <span className="opacity-50" style={{ color: c.brackets }}>[{value.length}]</span>
                     {renderPick()}
                 </div>
                 {!collapsed && (
@@ -316,16 +289,16 @@ export default function JsonEditor({
                         paddingLeft: depth * step, // ✅ как в первом
                     }}
                 >
-                    <div style={{ opacity: 0.55 }}>
+                    <div className="opacity-50">
                         {collapsed ? <MdKeyboardArrowRight /> : <MdKeyboardArrowDown />}
                     </div>
                     {label && (
-                        <span style={label.startsWith("[") ? indexStyle : keyStyle}>
+                        <span className="opacity-50" style={label.startsWith("[") ? indexStyle : keyStyle}>
                             {label}:
                         </span>
                     )}
-                    <span style={{ color: c.type, marginLeft: label ? 4 : 0 }}>Object</span>
-                    <span style={{ color: c.brackets }}>{"{" + entries.length + "}"}</span>
+                    <span className="opacity-50" style={{ color: c.type, marginLeft: label ? 4 : 0 }}>Object</span>
+                    <span className="opacity-50" style={{ color: c.brackets }}>{"{" + entries.length + "}"}</span>
                     {renderPick()}
                 </div>
                 {!collapsed && (

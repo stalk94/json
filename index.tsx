@@ -5,7 +5,7 @@ import './style/tailwind.css';
 
 
 function App() {
-    const [pick, setPick] = React.useState();
+    const [pick, setPick] = React.useState('root/age');
     const [data, setData] = React.useState({
         name: "Alex",
         age: 25,
@@ -36,6 +36,14 @@ function App() {
                 onChange={setData}
                 onRename={handleRename}
                 type='edit'
+            />
+            <Json
+                editable={false}
+                value={data}
+                pickedPath={pick}
+                onPick={setPick}
+                defaultCollapsed={false}
+                type='pick'
             />
         </div>
     );
