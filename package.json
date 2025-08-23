@@ -1,6 +1,6 @@
 {
     "name": "react-json-editor-tw",
-    "version": "0.4.0",
+    "version": "0.4.2",
     "author": "stalk94",
     "homepage": "",
     "repository": {
@@ -10,10 +10,12 @@
     "description": "Beautiful and customizable JSON editor for React with Tailwind CSS design. Supports editable fields, theme customization, and modern UI for working with JSON data.",
     "module": "./dist/json-editor.es.js",
     "types": "./dist/index.d.ts",
+    "main": "./dist/json-editor.umd.js",
     "type": "module",
     "exports": {
         ".": {
             "import": "./dist/json-editor.es.js",
+            "require": "./dist/json-editor.umd.js",
             "types": "./dist/index.d.ts"
         }
     },
@@ -22,7 +24,7 @@
         "dist"
     ],
     "scripts": {
-        "build": "vite build",
+        "build": "vite build && tsc -p tsconfig.json",
         "dev": "vite",
         "build:types": "tsc -p tsconfig.json"
     },
@@ -56,10 +58,8 @@
         "@types/react-dom": "^19.1.7",
         "@vitejs/plugin-react": "^5.0.1",
         "autoprefixer": "^10.4.21",
-        "cors": "^2.8.5",
         "react-icons": "^5.5.0",
         "tailwindcss": "^4.1.12",
-        "tsup": "^8.5.0",
         "typescript": "^5.8.3",
         "vite": "^7.1.3"
     },

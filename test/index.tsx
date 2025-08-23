@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
-import Json from './src';
+import Json from '../src';
 import './style/tailwind.css';
 
 
